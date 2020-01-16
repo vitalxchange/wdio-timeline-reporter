@@ -13,7 +13,7 @@ import { generateMarkup } from './components/generate-markup';
 import indexHtml from './index-template';
 import { waitForFileExistsAndResize, deepSearch } from './utils';
 import { promisify } from 'util';
-import { ReporterOptions } from './timeline-reporter';
+import TimelineReporter, { ReporterOptions } from './timeline-reporter';
 
 const writeFilePromiseSync = promisify(writeFile);
 
@@ -39,7 +39,7 @@ export class TimelineService {
 
   setReporterOptions(config: WdioConfiguration) {
     const timelineFilter = config.reporters.filter(
-      item => Array.isArray(item) && item[0] === 'timeline'
+      item => Array.isArray(item) && (item[0] === 'timeline' || item[0] === TimelineReporter)
     );
     if (timelineFilter.length === 0) {
       throw new Error(
@@ -89,7 +89,7 @@ export class TimelineService {
 
       // close watcher in onComplete
       this.watcher = watch(this.resolvedOutputDir, (eventType, filename) => {
-        if (filename.includes('timeline-reporter')) {
+        if (filename.includes('timeline-reporter') || filename.includes("TimelineReporter")) {
           appendFileSync(this.changeLogFile, `${filename}\n`);
         }
       });
